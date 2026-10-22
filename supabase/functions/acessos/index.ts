@@ -42,12 +42,12 @@ Deno.serve(async (req) => {
     return resp({ ok: true });
   }
 
-  // demais ações: só administrador ativo
+  // demais ações: só o dono do sistema (quem libera os acessos)
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
   const { data: u } = await adm.auth.getUser(token);
   if (!u?.user) return resp({ erro: "Entre novamente no sistema." }, 401);
-  const { data: eu } = await adm.from("profiles").select("role,status").eq("id", u.user.id).single();
-  if (!eu || eu.role !== "admin" || eu.status !== "ativo") return resp({ erro: "Só o administrador pode fazer isso." }, 403);
+  const { data: eu } = await adm.from("profiles").select("status,dono").eq("id", u.user.id).single();
+  if (!eu || !eu.dono || eu.status !== "ativo") return resp({ erro: "Só o dono do sistema pode cuidar dos acessos." }, 403);
 
   if (acao === "criar") {
     if (!emailOk(b.email)) return resp({ erro: "Informe um e-mail válido." }, 400);
@@ -74,7 +74,8 @@ Deno.serve(async (req) => {
   if (acao === "excluir") {
     if (typeof b.id !== "string") return resp({ erro: "Usuário inválido." }, 400);
     if (b.id === u.user.id) return resp({ erro: "Você não pode excluir o próprio acesso." }, 400);
-    const { data: alvo } = await adm.from("profiles").select("role,status").eq("id", b.id).single();
+    const { data: alvo } = await adm.from("profiles").select("role,status,dono").eq("id", b.id).single();
+    if (alvo?.dono) return resp({ erro: "O acesso do dono não pode ser excluído." }, 400);
     if (alvo?.role === "admin" && alvo?.status === "ativo") {
       const { count } = await adm.from("profiles").select("id", { count: "exact", head: true }).eq("role", "admin").eq("status", "ativo");
       if ((count || 0) <= 1) return resp({ erro: "Precisa existir ao menos um administrador ativo." }, 400);

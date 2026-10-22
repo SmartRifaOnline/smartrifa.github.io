@@ -108,3 +108,19 @@ select cron.schedule('backup-diario', '0 6 * * *', $$select public.faz_backup('d
 
 -- funções de gatilho não ficam disponíveis pela API
 revoke execute on function public.novo_usuario(), public.protege_ultimo_admin(), public.docs_carimbo() from anon, authenticated, public;
+
+-- 22/10/2026: só o dono do sistema cuida dos acessos
+alter table public.profiles add column dono boolean not null default false;
+update public.profiles set dono = true where email = 'alberths177@gmail.com';
+create or replace function public.sou_dono() returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists(select 1 from public.profiles where id = auth.uid() and status = 'ativo' and dono);
+$$;
+revoke execute on function public.sou_dono() from anon, public;
+grant execute on function public.sou_dono() to authenticated;
+alter policy "ver o proprio perfil ou admin ve todos" on public.profiles using (id = (select auth.uid()) or (select public.sou_dono()));
+alter policy "ver o proprio perfil ou admin ve todos" on public.profiles rename to "ver o proprio perfil ou o dono ve todos";
+alter policy "admin altera perfis" on public.profiles using ((select public.sou_dono())) with check ((select public.sou_dono()));
+alter policy "admin altera perfis" on public.profiles rename to "so o dono altera perfis";
+-- novo_usuario() passa a gravar dono = (e-mail do dono) e protege_ultimo_admin() impede
+-- alterar o acesso do dono ou tornar outra conta dona.

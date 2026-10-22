@@ -180,7 +180,7 @@ function traduz(e){
 function guardaPerfil(p){ perfil=p; try{ if(p) localStorage.setItem(PKEY,J(p)); else localStorage.removeItem(PKEY); }catch(e){} }
 function perfilGuardado(id){ try{ var p=JSON.parse(localStorage.getItem(PKEY)); return p&&p.id===id?p:null; }catch(e){ return null; } }
 function carregaPerfil(user){
-  return sb.from('profiles').select('id,email,nome,tel,role,status').eq('id',user.id).maybeSingle().then(function(r){
+  return sb.from('profiles').select('id,email,nome,tel,role,status,dono').eq('id',user.id).maybeSingle().then(function(r){
     if(r.error) throw r.error;
     if(!r.data) return {id:user.id,email:user.email,nome:'',role:'vendedor',status:'pendente'};
     return r.data;
@@ -227,7 +227,7 @@ function emRecuperacao(){ return recuperando; }
 if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='PASSWORD_RECOVERY'){ recuperando=true; if(H&&H.recuperacao) H.recuperacao(); } });
 
 /* administração de acessos */
-function perfis(){ return sb.from('profiles').select('id,email,nome,tel,role,status,criado_em').order('criado_em').then(function(r){ if(r.error) throw new Error(traduz(r.error)); return r.data; }); }
+function perfis(){ return sb.from('profiles').select('id,email,nome,tel,role,status,dono,criado_em').order('criado_em').then(function(r){ if(r.error) throw new Error(traduz(r.error)); return r.data; }); }
 function mudaPerfil(id,campos){ return sb.from('profiles').update(campos).eq('id',id).select('id').then(function(r){ if(r.error) throw new Error(/administrador ativo/.test(r.error.message)?'Precisa existir ao menos um administrador ativo.':traduz(r.error)); if(!r.data||!r.data.length) throw new Error('Sem permissão.'); }); }
 function criaAcesso(o){ o.acao='criar'; return funcao(o); }
 function trocaSenha(id,senha){ return funcao({acao:'senha',id:id,senha:senha}); }
