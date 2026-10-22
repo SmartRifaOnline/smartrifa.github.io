@@ -105,3 +105,6 @@ revoke execute on function public.faz_backup(text) from anon, authenticated, pub
 create extension if not exists pg_cron;
 select cron.schedule('backup-por-hora', '0 * * * *', $$select public.faz_backup('hora')$$);
 select cron.schedule('backup-diario', '0 6 * * *', $$select public.faz_backup('dia')$$);
+
+-- funções de gatilho não ficam disponíveis pela API
+revoke execute on function public.novo_usuario(), public.protege_ultimo_admin(), public.docs_carimbo() from anon, authenticated, public;
