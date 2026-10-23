@@ -12,7 +12,8 @@ Endereço: https://smartrifaonline.github.io
   - `docs`: os dados do sistema. Um documento `geral` (ajustes, contatos, registro de atividades, licença), um `rifa:<id>` por rifa e um `capa:<id>` com a imagem de capa.
   - `backups`: cópia completa de hora em hora (últimas 24 horas) e uma por dia (último mês), feitas pelo `pg_cron`.
   - Função `acessos` (Edge Function): pedir acesso, e para o administrador criar acesso, trocar senha e excluir.
-- **Segurança**: regras do banco (RLS) só deixam ler quem está ativo, só deixam alterar administradores e vendedores, e só o administrador altera acessos.
+- **Clientes e membros**: cada acesso tem um `projeto`. O dono do sistema e a equipe dele usam o projeto `principal`. Um **cliente** (criado só pelo dono) tem um projeto próprio, com rifas separadas, e adiciona os **membros** da equipe dele, que entram na hora. O membro trabalha nos números e bolões, mas não cria, edita, corrige, cancela nem finaliza rifas. Na tabela `docs`, os documentos de um cliente se chamam `<projeto>/<documento>`.
+- **Segurança**: regras do banco (RLS) só deixam ler quem está ativo, só deixam alterar administradores e vendedores, só o dono do sistema altera acessos, e o cliente só cuida dos membros dele. Cada um só vê os dados do próprio projeto.
 - **Várias pessoas ao mesmo tempo**: cada alteração é enviada na hora. Se duas pessoas salvarem a mesma rifa juntas, as duas versões são juntadas (`nuvem.js`). Sem internet, o sistema continua funcionando e envia tudo quando a conexão volta.
 
 ## Arquivos

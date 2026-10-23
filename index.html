@@ -310,7 +310,7 @@ body:not(.logado) .app{display:none}
 .usr span{opacity:.75;font-size:12px} .usr .link{color:#fff;align-self:flex-start;margin-top:4px}
 .usr+.nuvem{margin-top:0}
 .tw{overflow-x:auto}
-body.vend [data-a="pdes"],body.esp #nav [data-v="cfg"],body.esp #nav [data-v="com"],body.esp #rfCom,body.esp #nuvem,body.esp #rNova,body.esp #rfEdit,body.esp #selToggle,body.esp [data-a="redit"],body.esp [data-a="blnovo2"],body.esp [data-a="bled"],body.esp [data-a="bldel"],body.esp [data-a="blpago"],body.esp [data-a="blcobra"],body.esp [data-a="lote"],body.esp [data-a="fin"],body.esp [data-a="plib"],body.esp [data-a="pdes"],body.esp [data-a="zdef"],body.esp [data-a="zres"],body.esp [data-a="zcopy"],body.esp [data-a="rcapax"],body.esp [data-a="canc"],body.esp [data-a="reab"],body.esp [data-a="compnota"],body.vend #nav [data-v="lista"],body.vend #nav [data-v="bolao"],body.vend #rfPainel,body.vend #rfDesc,body.vend #rfPrem,body.vend #rfAlert,body.vend #rfEdit,body.vend #nuvem,body.vend #lsAlert,body.vend #rfKpis,body.vend #rfBox .bar button[onclick],body.vend #rNova,body.vend [data-v="cfg"],body.vend [data-a="redit"],body.vend [data-a="rcapax"],body.vend [data-a="zdef"],body.vend [data-a="fin"],body.vend [data-a="lote"],body.vend [data-a="comp"],body.vend [data-a="rel"],body.vend [data-a="rexc"],body.vend [data-a="canc"],body.vend [data-a="reab"],body.vend [data-a="zres"],body.vend [data-a="zcopy"],body.vend [data-a="bldel"],body.vend [data-a="plib"]{display:none!important}
+body.vend:not(.memb) [data-a="pdes"],body.esp #nav [data-v="cfg"],body.esp #nav [data-v="com"],body.esp #rfCom,body.esp #nuvem,body.esp #rNova,body.esp #rfEdit,body.esp #selToggle,body.esp [data-a="redit"],body.esp [data-a="blnovo2"],body.esp [data-a="bled"],body.esp [data-a="bldel"],body.esp [data-a="blpago"],body.esp [data-a="blcobra"],body.esp [data-a="lote"],body.esp [data-a="fin"],body.esp [data-a="plib"],body.esp [data-a="pdes"],body.esp [data-a="zdef"],body.esp [data-a="zres"],body.esp [data-a="zcopy"],body.esp [data-a="rcapax"],body.esp [data-a="canc"],body.esp [data-a="reab"],body.esp [data-a="compnota"],body.vend #nav [data-v="lista"],body.vend:not(.memb) #nav [data-v="bolao"],body.vend #rfPainel,body.vend #rfDesc,body.vend #rfPrem,body.vend #rfAlert,body.vend #rfEdit,body.vend #nuvem,body.vend #lsAlert,body.vend #rfKpis,body.vend #rfBox .bar button[onclick],body.vend #rNova,body.vend [data-v="cfg"],body.vend [data-a="redit"],body.vend [data-a="rcapax"],body.vend [data-a="zdef"],body.vend [data-a="fin"],body.vend:not(.memb) [data-a="lote"],body.vend:not(.memb) [data-a="comp"],body.vend [data-a="rel"],body.vend [data-a="rexc"],body.vend [data-a="canc"],body.vend [data-a="reab"],body.vend [data-a="zres"],body.vend [data-a="zcopy"],body.vend:not(.memb) [data-a="bldel"],body.vend:not(.memb) [data-a="plib"]{display:none!important}
 
 html{-webkit-text-size-adjust:100%} button,a,.pt{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .gimp{margin-top:6px;font-size:13px}
@@ -1060,7 +1060,7 @@ var TIT={lista:['Minhas rifas','Crie quantas rifas quiser e acompanhe cada uma.'
   cfg:['Ajustes','Alerta de cobrança, marca, cópias extras e backup.'],
   acesso:['Acesso e segurança','Acessos, backups na nuvem e registro de atividades.']};
 function go(v){
-  if(cur&&cur.role==='vendedor'&&(v==='cfg'||v==='lista'||v==='bolao')) v='rifa';
+  if(cur&&cur.role==='vendedor'&&(v==='cfg'||v==='lista'||(v==='bolao'&&!cur.membro))) v='rifa';
   if(cur&&cur.role==='espelho'&&v==='cfg') v='lista';
   [].forEach.call(nav.children,function(x){x.classList.toggle('on',x.dataset.v===v)});
   ['lista','rifa','bolao','com','rel','cfg','acesso'].forEach(function(s){ $('v-'+s).classList.toggle('on',s===v); });
@@ -1384,7 +1384,7 @@ function resCardsHtml(r,ro,q){
   if(q) L=L.filter(function(x){ return semAc(x.nome+' '+(x.nomes||[]).join(' ')+' '+x.nums.map(function(n){return pad(n,r)+' '+n}).join(' ')+' em formação reservado').indexOf(q)>=0; });
   return L.map(function(x){ var z=resResumo(r,x), ns=x.nums.filter(function(n){return !r.pontos[n]});
     return '<div class="card bolao resv"><div class="gh"><h3>🔒 '+esc(x.nome||'Bolão em formação')+' <span class="tag" style="background:#ede9fe;color:#5b21b6">Em formação · reservado</span></h3>'+
-      '<div><button class="act sec" type="button" data-rabre="'+r.id+'|'+x.id+'">'+(ro?'Abrir na rifa':'Abrir em Reservar números')+'</button>'+(isAdmin()?' <button class="act sec" type="button" data-a="resdesn" data-r="'+r.id+'|'+x.id+'" style="color:#1D4ED8">🚪 Desistente</button>':'')+'</div></div>'+
+      '<div><button class="act sec" type="button" data-rabre="'+r.id+'|'+x.id+'">'+(ro?'Abrir na rifa':'Abrir em Reservar números')+'</button>'+(podeNumeros()?' <button class="act sec" type="button" data-a="resdesn" data-r="'+r.id+'|'+x.id+'" style="color:#1D4ED8">🚪 Desistente</button>':'')+'</div></div>'+
       '<div class="hint" style="margin:0 0 6px">'+plural(ns.length,'número reservado','números reservados')+' · '+plural(z.pess,'cota','cotas')+' de <b>'+fG(z.cada)+'</b>'+(convTxt(r,z.cada)?' ('+esc(convTxt(r,z.cada))+')':'')+' · '+plural(z.ocup,'participante','participantes')+' · '+plural(z.vagas,'vaga disponível','vagas disponíveis')+(z.pgs?' · '+z.pgs+' PG':'')+(x.por?' · por '+esc(x.por):'')+'</div>'+
       '<div>'+ns.map(function(n){return '<span class="nchip res">'+pad(n,r)+'</span>'}).join('')+'</div>'+
       ((x.nomes||[]).some(function(v){return v})?'<div class="hint" style="margin:8px 0 0">'+(x.nomes||[]).slice(0,z.pess).map(function(v,i){ return (i+1)+'. '+(v?'<b>'+esc(v)+'</b>':'<i>vaga disponível</i>')+((x.pgs||[])[i]?' <span class="tag a">PG</span>':''); }).join(' · ')+'</div>':'')+'</div>'; }).join('');
@@ -1434,7 +1434,7 @@ function dlgPonto(n){
    (p&&!p.bolao?'<button class="act sec" data-a="pdes" style="color:#1D4ED8">Desistente</button>':'')+
    (p?'<button class="act sec" data-a="shcomp" data-n="'+n+'">Comprovante</button>':'')+
    (p&&!p.pago?(p.tel?'<button class="act sec" data-a="ptcobra" data-n="'+n+'" style="color:var(--out)">🔔 Cobrar</button>':'<span class="hint" style="margin:0">Cobrar: cadastre o telefone</span>'):'')+
-   (p&&!p.pago&&!p.bolao&&isAdmin()?'<button class="act sec" data-a="pfbol" data-n="'+n+'" style="color:#7C3AED">👥 Formar bolão</button>':'')+
+   (p&&!p.pago&&!p.bolao&&podeNumeros()?'<button class="act sec" data-a="pfbol" data-n="'+n+'" style="color:#7C3AED">👥 Formar bolão</button>':'')+
    '<span class="hint" id="pErr" style="color:var(--out);margin:0"></span></div>';
   dlClientes(); $('dlgBody').innerHTML=h; if(!$('dlg').open) $('dlg').showModal(); $('pNome').focus();
 }
@@ -1480,7 +1480,7 @@ function pontosDaPessoa(r,n){
 }
 /* números individuais da pessoa, aguardando pagamento, viram uma reserva no Formar bolão (com o nome dela) */
 function pontoParaBolao(n){
-  if(!isAdmin()) return;
+  if(!podeNumeros()) return;
   var r=rifaAtual(), p=r&&r.pontos[n]; if(!p||p.bolao||p.pago) return;
   var L=pontosDaPessoa(r,n).filter(function(k){ var q=r.pontos[k]; return q&&!q.pago&&!q.bolao; });
   var d=document.getElementById('dlgAsk'), bx=document.getElementById('askBody');
@@ -1516,7 +1516,7 @@ function umOuTodos(tit,msg,r,n,L,cb){
   if(!d.open) d.showModal();
 }
 function liberaPonto(){
-  if(!isAdmin()) return;
+  if(!podeNumeros()) return;
   var r=rifaAtual(), n=editN, p=r&&r.pontos[n]; if(!p) return;
   var L=pontosDaPessoa(r,n);
   umOuTodos('Liberar número',(L.length>1?p.nome+' tem '+L.length+' números nesta rifa. ':'')+'Os dados de '+p.nome+' serão apagados dos números liberados.',r,n,L,function(ns){
@@ -1526,7 +1526,7 @@ function liberaPonto(){
   });
 }
 function desistePonto(){
-  if(!isAdmin()) return;
+  if(!podeNumeros()) return;
   var r=rifaAtual(), n=editN, p=r&&r.pontos[n]; if(!p||p.bolao) return;
   var L=pontosDaPessoa(r,n);
   umOuTodos('Desistente',(L.length>1?p.nome+' tem '+L.length+' números nesta rifa. ':'')+'Os dados de '+p.nome+' serão apagados e os números ficam livres, em azul (“livre desistente”).',r,n,L,function(ns){
@@ -1546,7 +1546,7 @@ function desItens(r,nome,tel,marc){
   return L;
 }
 function dlgDesiste(rid,nome,tel,marc){
-  if(!isAdmin()) return;
+  if(!podeNumeros()) return;
   var r=st.rifas.find(function(z){return z.id===rid}); if(!r||!nome) return;
   var L=desItens(r,nome,tel,marc); if(!L.length) return;
   var d=document.getElementById('dlgAsk'), bx=document.getElementById('askBody');
@@ -1573,7 +1573,7 @@ function dlgDesiste(rid,nome,tel,marc){
 }
 /* desistente numa reserva (bolão em formação): escolhe todos os números ou só os marcados; eles saem da reserva e ficam livres como desistentes (azul) */
 function desisteResNums(r,x,reabre,marc){
-  if(!isAdmin()) return;
+  if(!podeNumeros()) return;
   var ns=x.nums.filter(function(n){ return !r.pontos[n]; }); if(!ns.length) return;
   var d=document.getElementById('dlgAsk'), bx=document.getElementById('askBody'), nome=x.nome||'Bolão em formação';
   bx.innerHTML='<h3 style="margin:0 0 6px">Desistente · '+esc(nome)+'</h3><p style="margin:0 0 10px;line-height:1.5">'+(ns.length>1?'Desistir de todos os números desta reserva ou só dos marcados?':'Confirmar a desistência do número desta reserva?')+' Os números escolhidos saem da reserva e ficam livres para venda, em azul (“livre desistente”).</p>'+
@@ -1595,7 +1595,7 @@ function desisteResNums(r,x,reabre,marc){
 }
 /* desistente num bolão formado: todos os participantes ou só os marcados; cada parte vira vaga disponível */
 function desisteBolao(bid){
-  if(!isAdmin()) return;
+  if(!podeNumeros()) return;
   var r=st.rifas.find(function(z){ return z.boloes.some(function(y){return y.id===bid}); }), b=r&&r.boloes.find(function(y){return y.id===bid}); if(!b) return;
   var ps=b.parts.filter(function(q){return q.nome});
   if(!ps.length){ msgRfa('Este bolão não tem participantes com nome.'); return; }
@@ -1850,7 +1850,7 @@ function salvaBolao(){
   msgRfa('Bolão “'+nome+'” salvo.'); try{ localStorage.removeItem('fbol_'+r.id); }catch(e){}
 }
 function apagaBolao(id){
-  if(!isAdmin()) return;
+  if(!podeNumeros()) return;
   var r=rifaAtual(), x=r&&r.boloes.find(function(y){return y.id===id}); if(!x) return;
   var lig=Object.keys(r.pontos).filter(function(k){return r.pontos[k].bolao===id});
   if(!conf('Apagar o bolão “'+x.nome+'”?'+(lig.length?' Os '+plural(lig.length,'número','números')+' do bolão ficarão livres.':''),function(){apagaBolao(id)})) return;
@@ -3643,7 +3643,9 @@ function zeraLock(){ gravaLock({n:0,ate:0}); }
 var NV=window.SRSYNC;
 function gf(id,rot,tipo,v){ return '<label>'+rot+' <input id="'+id+'" type="'+(tipo||'text')+'" value="'+esc(v||'')+'" autocomplete="'+(tipo==='password'?'current-password':tipo==='email'?'email':'off')+'" autocapitalize="none" autocorrect="off" spellcheck="false"></label>'; }
 function gMostra(){ return '<label class="gshow"><input type="checkbox" id="gMostra"> Mostrar senha</label>'; }
-function roleTxt(r){ return r==='admin'?'Administrador':r==='espelho'?'Somente leitura':'Vendedor'; }
+function roleTxt(r){ return r==='admin'?'Administrador':r==='espelho'?'Somente leitura':r==='cliente'?'Cliente':r==='membro'?'Membro':'Vendedor'; }
+/* papel de um acesso: cliente (dados próprios), membro (equipe de um cliente) ou perfil do sistema principal */
+function papel(p){ if(!p) return ''; if(p.dono) return 'Dono do sistema'; if(p.projeto&&p.projeto!=='principal') return p.projeto===p.id?'Cliente':'Membro'; return roleTxt(p.role); }
 function icoSrc(){ var l=document.querySelector('link[rel=apple-touch-icon]'); return l?l.href:''; }
 function gate(modo,ex){
   ex=ex||{};
@@ -3712,6 +3714,9 @@ function reiniciaIdle(){ clearTimeout(idleT); var m=idleMin(); if(cur&&m>0) idle
 function entra(u){
   cur=u;
   $('gate').classList.add('hide'); document.body.classList.add('logado'); document.body.classList.toggle('vend',u.role==='vendedor'); document.body.classList.toggle('esp',u.role==='espelho');
+  document.body.classList.toggle('memb',!!u.membro);
+  var na=document.querySelector('#nav [data-v="acesso"] span'); if(na) na.textContent=u.cliente?'Membros':'Acesso e segurança';
+  TIT.acesso=u.cliente?['Membros','Sua equipe: quem trabalha com você nas suas rifas, em tempo real.']:['Acesso e segurança','Acessos, backups na nuvem e registro de atividades.'];
   pintaUsr(); reiniciaIdle(); go(u.role==='vendedor'?'rifa':'lista');
   setTimeout(alertaDiaAuto,900);
   if(u.dono) setTimeout(avisaPedidos,1500);
@@ -3719,13 +3724,13 @@ function entra(u){
 function sair(auto){
   if(cur&&!auto&&cur.role!=='espelho'){ reg('Saiu do sistema'); save(); }
   cur=null; clearTimeout(idleT);
-  fechar(); document.body.classList.remove('vend'); document.body.classList.remove('esp');
+  fechar(); document.body.classList.remove('vend'); document.body.classList.remove('esp'); document.body.classList.remove('memb');
   var go2=function(){ gate('login'); if(auto) gerr('Sessão encerrada por inatividade. Entre novamente.'); };
   setTimeout(function(){ NV.sair().then(go2,go2); },auto?0:600);
 }
 var syncTxt={ok:'☁️ Salvo na nuvem',enviando:'☁️ Salvando...',offline:'📴 Sem internet: será salvo quando voltar',erro:'⚠️ Não foi possível salvar na nuvem. Tentando de novo...'};
 function pintaSync(s){ var e=$('syncSt'); if(e){ e.textContent=syncTxt[s]||''; e.title=syncTxt[s]||''; } }
-function pintaUsr(){ $('usr').innerHTML=cur?'<b>'+esc(cur.nome)+'</b><span>'+roleTxt(cur.role)+'</span><span id="syncSt" style="opacity:.9"></span>'+(cur.role==='espelho'?'':'<button class="link" data-a="bkgo">Backup</button>')+' <button class="link" data-a="sair">Sair</button>':''; if(NV) NV.aoMudarEstado(pintaSync); }
+function pintaUsr(){ $('usr').innerHTML=cur?'<b>'+esc(cur.nome)+'</b><span>'+papel(cur)+'</span><span id="syncSt" style="opacity:.9"></span>'+(cur.role==='espelho'?'':'<button class="link" data-a="bkgo">Backup</button>')+' <button class="link" data-a="sair">Sair</button>':''; if(NV) NV.aoMudarEstado(pintaSync); }
 var LICINFO=null;
 function licAplica(r){
   LICINFO=r.info; SRLIC.lsSet('rifas',r.code);
@@ -3740,6 +3745,8 @@ function gAtiva(){
 }
 /* confere a licença (guardada nos dados da nuvem) e entra */
 function licEntra(u){
+  /* clientes e membros usam a licença do dono do sistema, que liberou o acesso */
+  if(u.projeto&&u.projeto!=='principal'){ entra(u); return; }
   var cand=[st.lic,SRLIC.lsGet('rifas')].filter(function(x,i,a){ return x&&a.indexOf(x)===i; });
   (function t(i,ult){
     if(i>=cand.length) return Promise.resolve(ult||{ok:false,msg:''});
@@ -3755,11 +3762,14 @@ function comPerfil(p){
   if(NV.emRecuperacao()){ gate('novasenha'); return; }
   if(p.status==='pendente'){ gate('pendente',{email:p.email}); return; }
   if(p.status!=='ativo'){ gate('bloqueado',{email:p.email}); return; }
-  var u={id:p.id,nome:p.nome||p.email,login:p.email,email:p.email,tel:p.tel||'',role:p.role,dono:!!p.dono};
+  var pj=p.projeto||'principal';
+  var u={id:p.id,nome:p.nome||p.email,login:p.email,email:p.email,tel:p.tel||'',role:p.role,dono:!!p.dono,projeto:pj,cliente:pj!=='principal'&&pj===p.id,membro:pj!=='principal'&&pj!==p.id};
   gate('carregando');
-  if(!ligado){ ligado=true; NV.liga({pega:function(){ return st; },poe:poeNuvem,recuperacao:function(){ gate('novasenha'); }}); }
+  if(!ligado){ ligado=true; NV.liga({pega:function(){ return st; },poe:poeNuvem,zera:zeraLocal,recuperacao:function(){ gate('novasenha'); }}); }
   NV.conecta(function(){ if(u.role!=='espelho'){ reg('Entrou no sistema',u.nome); save(); } licEntra(u); });
 }
+/* outra conta (outro cliente) neste aparelho: começa sem os dados locais da anterior */
+function zeraLocal(){ st=normaliza({cfg:{aviso:15},rifas:[],sel:null,users:[],log:[]}); try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 /* dados que chegaram da nuvem (de outra pessoa ou de outro aparelho) */
 var poeT=null;
 function poeNuvem(o){
@@ -3784,16 +3794,16 @@ function avisaPedidos(){
 /* ---------- ações (permissões) ---------- */
 function acessoAcao(a,b){
   if(!cur) return true;
-  if(ADMIN_A[a]&&!isAdmin()){ aviso('Sem permissão: esta ação é só do administrador.'); return true; }
+  if(ADMIN_A[a]&&!isAdmin()&&!(cur.membro&&MEMB_A[a])){ aviso('Sem permissão: esta ação é só do administrador.'); return true; }
   var id=b.dataset.id;
   if(a==='sair'){ sair(); return true; }
-  if(DONO_A[a]&&!souDono()){ aviso('Só o dono do sistema pode cuidar dos acessos.'); return true; }
+  if(DONO_A[a]&&!souDono()&&!souCliente()){ aviso('Só o dono do sistema pode cuidar dos acessos.'); return true; }
   if(a==='unovo'){ dlgUser(); return true; }
   if(a==='usalvar'){ salvaUser(); return true; }
   if(a==='usenha'){ dlgSenhaUser(id); return true; }
   if(a==='usenhasalvar'){ salvaSenhaUser(); return true; }
-  if(a==='ulib'){ mudaUser(id,{status:'ativo'},'Liberou o acesso de '); return true; }
-  if(a==='ublq'){ mudaUser(id,{status:'bloqueado'},'Bloqueou o acesso de '); return true; }
+  if(a==='ulib'){ mudaUser(id,{status:'ativo'},souCliente()?'Desbloqueou o membro ':'Liberou o acesso de '); return true; }
+  if(a==='ublq'){ mudaUser(id,{status:'bloqueado'},souCliente()?'Bloqueou o membro ':'Bloqueou o acesso de '); return true; }
   if(a==='udel'){ apagaUser(id); return true; }
   if(a==='urec'){ carregaAcessos(true); return true; }
   if(a==='nbkdl'){ baixaBackupNuvem(id); return true; }
@@ -3810,10 +3820,15 @@ document.addEventListener('change',function(ev){ if(cur&&!isAdmin()&&ev.target.c
 /* só o dono do sistema libera, bloqueia, cria e exclui acessos (a nuvem também confere) */
 var DONO_A={unovo:1,usalvar:1,usenha:1,usenhasalvar:1,ulib:1,ublq:1,udel:1,urec:1};
 function souDono(){ return !!cur&&!!cur.dono; }
+/* o cliente cuida só da própria equipe (membros); a nuvem também confere */
+function souCliente(){ return !!cur&&!!cur.cliente; }
+/* o membro de um cliente faz tudo nos números e bolões (mas não edita, corrige, cancela nem finaliza rifas) */
+var MEMB_A={ptcobra:1,pdes:1,plib:1,lote:1,loteprox:1,lotewa:1,comp:1,compdet:1,compnota:1,bldel:1};
+function podeNumeros(){ return isAdmin()||(!!cur&&!!cur.membro); }
 var ACS=null, ACSerr='', BKS=null, ACSload=false;
 function carregaAcessos(forca){
   if(!isAdmin()) return;
-  if(!souDono()){ if(!BKS&&!ACSload){ ACSload=true; NV.backups().then(function(L){ BKS=L; renderAcesso(); },function(){ BKS=[]; renderAcesso(); }); } return; }
+  if(!souDono()&&!souCliente()){ if(!BKS&&!ACSload){ ACSload=true; NV.backups().then(function(L){ BKS=L; renderAcesso(); },function(){ BKS=[]; renderAcesso(); }); } return; }
   if((ACS||ACSload)&&!forca) return;
   ACSload=true;
   NV.perfis().then(function(L){ ACSload=false; ACS=L; ACSerr=''; renderAcesso(); },function(e){ ACSload=false; ACSerr=e.message; renderAcesso(); });
@@ -3821,20 +3836,29 @@ function carregaAcessos(forca){
 }
 function nomeAcs(id){ var u=(ACS||[]).find(function(x){return x.id===id}); return u?(u.nome||u.email):''; }
 function dlgUser(){
+  if(souCliente()) return dlgMembro();
   $('dlgBody').innerHTML='<div class="dh"><h2>Criar acesso</h2><button class="act sec" data-a="fechar">Fechar</button></div>'+
    '<div class="row"><label style="flex:1;min-width:200px">Nome <input id="uNome"></label><label style="flex:1;min-width:220px">E-mail (para entrar) <input id="uEmail" type="email" autocomplete="off" autocapitalize="none"></label></div>'+
-   '<div class="row" style="margin-top:12px"><label style="min-width:200px">Perfil <select id="uRole"><option value="vendedor" selected>Vendedor</option><option value="admin">Administrador</option><option value="espelho">Somente leitura</option></select></label>'+
+   '<div class="row" style="margin-top:12px"><label style="min-width:200px">Perfil <select id="uRole"><option value="vendedor" selected>Vendedor</option><option value="admin">Administrador</option><option value="espelho">Somente leitura</option><option value="cliente">Cliente (rifas próprias)</option></select></label>'+
    '<label style="flex:1;min-width:200px">Senha inicial (mínimo 6) <input id="uSenha" type="text" autocomplete="off"></label></div>'+
-   '<p class="hint">Vendedor: vê as rifas, cadastra e edita os números vendidos e cria bolões. Administrador: acesso total às rifas (só você libera acessos). Somente leitura: só consulta. Passe o e-mail e a senha para a pessoa; ela pode trocar a senha depois.</p>'+
+   '<p class="hint">Vendedor: vê as rifas, cadastra e edita os números vendidos e cria bolões. Administrador: acesso total às suas rifas (só você libera acessos). Somente leitura: só consulta. Cliente: tem o próprio sistema, com rifas separadas das suas, e adiciona os membros da equipe dele. Passe o e-mail e a senha para a pessoa; ela pode trocar a senha depois.</p>'+
    '<div class="row" style="margin-top:12px"><button class="act" data-a="usalvar">Criar acesso</button><span class="hint" id="uErr" style="color:var(--out);margin:0"></span></div>';
   $('dlg').showModal();
 }
+function dlgMembro(){
+  $('dlgBody').innerHTML='<div class="dh"><h2>Adicionar membro</h2><button class="act sec" data-a="fechar">Fechar</button></div>'+
+   '<div class="row"><label style="flex:1;min-width:200px">Nome <input id="uNome"></label><label style="flex:1;min-width:220px">E-mail (para entrar) <input id="uEmail" type="email" autocomplete="off" autocapitalize="none"></label></div>'+
+   '<div class="row" style="margin-top:12px"><label style="flex:1;min-width:200px">Senha inicial (mínimo 6) <input id="uSenha" type="text" autocomplete="off"></label></div>'+
+   '<p class="hint">O membro entra na hora e trabalha nas suas rifas junto com você, em tempo real: vende, reserva, cobra, libera números e cuida dos bolões. Ele não cria, edita, corrige, cancela nem finaliza rifas. Passe o e-mail e a senha para a pessoa; ela pode trocar a senha depois.</p>'+
+   '<div class="row" style="margin-top:12px"><button class="act" data-a="usalvar">Adicionar membro</button><span class="hint" id="uErr" style="color:var(--out);margin:0"></span></div>';
+  $('dlg').showModal();
+}
 function salvaUser(){
-  var nome=$('uNome').value.trim(), em=$('uEmail').value.trim(), role=$('uRole').value, s=$('uSenha').value;
+  var nome=$('uNome').value.trim(), em=$('uEmail').value.trim(), role=$('uRole')?$('uRole').value:'membro', s=$('uSenha').value;
   var err=''; if(!nome||!em) err='Preencha o nome e o e-mail.'; else if(s.length<6) err='A senha precisa ter pelo menos 6 caracteres.';
   if(err){ $('uErr').textContent=err; return; }
   $('uErr').textContent='Criando...';
-  NV.criaAcesso({nome:nome,email:em,senha:s,role:role}).then(function(){ reg('Criou o acesso de '+nome+' ('+roleTxt(role)+')'); save(); fechar(); carregaAcessos(true); aviso('Acesso criado. Passe para '+nome+' o e-mail '+em+' e a senha.'); },
+  NV.criaAcesso({nome:nome,email:em,senha:s,role:role}).then(function(){ reg((role==='membro'?'Adicionou o membro ':'Criou o acesso de ')+nome+(role==='membro'?'':' ('+roleTxt(role)+')')); save(); fechar(); carregaAcessos(true); aviso((role==='membro'?'Membro adicionado. ':'Acesso criado. ')+'Passe para '+nome+' o e-mail '+em+' e a senha.'); },
     function(e){ $('uErr').textContent=e.message; });
 }
 function dlgSenhaUser(id){
@@ -3851,7 +3875,7 @@ function salvaSenhaUser(){
 }
 function mudaUser(id,campos,txt){
   if(cur&&cur.id===id&&campos.status&&campos.status!=='ativo'){ aviso('Você não pode bloquear o próprio acesso.'); return; }
-  NV.mudaPerfil(id,campos).then(function(){ if(txt){ reg(txt+nomeAcs(id)); save(); } carregaAcessos(true); },function(e){ aviso(e.message); carregaAcessos(true); });
+  (souCliente()?NV.statusAcesso(id,campos.status):NV.mudaPerfil(id,campos)).then(function(){ if(txt){ reg(txt+nomeAcs(id)); save(); } carregaAcessos(true); },function(e){ aviso(e.message); carregaAcessos(true); });
 }
 function apagaUser(id){
   if(cur&&cur.id===id){ aviso('Você não pode excluir o próprio acesso.'); return; }
@@ -3885,17 +3909,33 @@ function acessosHtml(){
     '<div class="row" style="margin-bottom:10px"><button class="act" data-a="unovo">Criar acesso</button><button class="act sec" data-a="urec">Atualizar lista</button></div>';
   if(ACSerr) return h+'<p class="hint" style="color:var(--out)">'+esc(ACSerr)+'</p></div>';
   if(!ACS) return h+'<p class="hint">Carregando...</p></div>';
-  var L=ACS.slice().sort(function(a,b){ var o={pendente:0,ativo:1,bloqueado:2}; return (o[a.status]-o[b.status])||String(a.nome).localeCompare(String(b.nome)); });
+  /* membros aparecem logo abaixo do cliente deles */
+  var o={pendente:0,ativo:1,bloqueado:2}, grupo=function(u){ var t=tipoAcs(u); return t==='membro'?u.projeto:u.id; }, chefe=function(u){ return (ACS||[]).find(function(x){return x.id===grupo(u)})||u; };
+  var L=ACS.slice().sort(function(a,b){ var A=chefe(a), B=chefe(b); return (o[A.status]-o[B.status])||String(A.nome).localeCompare(String(B.nome))||String(grupo(a)).localeCompare(grupo(b))||((tipoAcs(a)==='membro')-(tipoAcs(b)==='membro'))||String(a.nome).localeCompare(String(b.nome)); });
   h+='<div class="tw"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Situação</th><th></th></tr></thead><tbody>'+L.map(function(u){
     var eu=(cur&&cur.id===u.id)||u.dono;
     return '<tr><td><b>'+esc(u.nome||'—')+'</b>'+(u.dono?' <small>(dono)</small>':'')+'</td><td>'+esc(u.email)+'</td>'+
-      '<td><select data-urole="'+u.id+'"'+(eu?' disabled':'')+'>'+['vendedor','admin','espelho'].map(function(r){ return '<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+roleTxt(r)+'</option>'; }).join('')+'</select></td>'+
+      '<td>'+(tipoAcs(u)==='membro'?'<small>Membro de '+esc(nomeAcs(u.projeto)||'cliente excluído')+'</small>':'<select data-urole="'+u.id+'"'+(eu?' disabled':'')+'>'+['vendedor','admin','espelho','cliente'].map(function(r){ return '<option value="'+r+'"'+(tipoAcs(u)===r?' selected':'')+'>'+roleTxt(r)+'</option>'; }).join('')+'</select>')+'</td>'+
       '<td>'+sitTag(u.status)+'</td><td style="white-space:nowrap">'+
       (u.status==='pendente'?'<button class="act ok" data-a="ulib" data-id="'+u.id+'" style="padding:6px 12px">Liberar</button> ':'')+
       (eu?'':(u.status==='bloqueado'?'<button class="link" data-a="ulib" data-id="'+u.id+'">Desbloquear</button>':u.status==='ativo'?'<button class="link" data-a="ublq" data-id="'+u.id+'">Bloquear</button>':'<button class="link" data-a="ublq" data-id="'+u.id+'">Recusar</button>')+' · ')+
-      '<button class="link" data-a="usenha" data-id="'+u.id+'">Senha</button>'+(eu?'':' · <button class="link" data-a="udel" data-id="'+u.id+'" style="color:var(--out)">Excluir</button>')+'</td></tr>';
+      (eu?'':'<button class="link" data-a="usenha" data-id="'+u.id+'">Senha</button> · <button class="link" data-a="udel" data-id="'+u.id+'" style="color:var(--out)">Excluir</button>')+'</td></tr>';
   }).join('')+'</tbody></table></div></div>';
   return h;
+}
+function tipoAcs(u){ if(u.projeto&&u.projeto!=='principal') return u.projeto===u.id?'cliente':'membro'; return u.role; }
+function membrosHtml(){
+  var h='<div class="card"><h2>Membros da equipe</h2><p class="hint" style="margin-top:0">Adicione quem trabalha com você. O membro entra na hora e todos trabalham nas suas rifas ao mesmo tempo, em tempo real. Ele vende, reserva, cobra, libera números e cuida dos bolões, mas não cria, edita, corrige, cancela nem finaliza rifas.</p>'+
+    '<div class="row" style="margin-bottom:10px"><button class="act" data-a="unovo">Adicionar membro</button><button class="act sec" data-a="urec">Atualizar lista</button></div>';
+  if(ACSerr) return h+'<p class="hint" style="color:var(--out)">'+esc(ACSerr)+'</p></div>';
+  if(!ACS) return h+'<p class="hint">Carregando...</p></div>';
+  var L=ACS.filter(function(u){ return u.id!==cur.id; }).sort(function(a,b){ return String(a.nome).localeCompare(String(b.nome)); });
+  if(!L.length) return h+'<p class="hint">Nenhum membro ainda.</p></div>';
+  return h+'<div class="tw"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Situação</th><th></th></tr></thead><tbody>'+L.map(function(u){
+    return '<tr><td><b>'+esc(u.nome||'—')+'</b></td><td>'+esc(u.email)+'</td><td>'+sitTag(u.status)+'</td><td style="white-space:nowrap">'+
+      (u.status==='ativo'?'<button class="link" data-a="ublq" data-id="'+u.id+'">Bloquear</button>':'<button class="link" data-a="ulib" data-id="'+u.id+'">Desbloquear</button>')+
+      ' · <button class="link" data-a="usenha" data-id="'+u.id+'">Senha</button> · <button class="link" data-a="udel" data-id="'+u.id+'" style="color:var(--out)">Excluir</button></td></tr>';
+  }).join('')+'</tbody></table></div></div>';
 }
 function backupsHtml(){
   var h='<div class="card"><h2>Backups automáticos na nuvem</h2><p class="hint" style="margin-top:0">Cada alteração já é salva na nuvem na hora. Além disso, uma cópia completa é guardada a cada hora (últimas 24 horas) e uma por dia (último mês). Para voltar a uma cópia: baixe o arquivo e use “Restaurar backup” em Ajustes.</p>';
@@ -3905,17 +3945,23 @@ function backupsHtml(){
     return '<tr><td>'+(b.tipo==='dia'?'Diária':'De hora em hora')+'</td><td>'+esc(new Date(b.criado_em).toLocaleString('pt-BR'))+'</td><td><button class="link" data-a="nbkdl" data-id="'+b.id+'">Baixar</button></td></tr>';
   }).join('')+'</tbody></table></div></div>';
 }
-document.addEventListener('change',function(ev){ var t=ev.target; if(t&&t.dataset&&t.dataset.urole&&souDono()){ var u=(ACS||[]).find(function(x){return x.id===t.dataset.urole}); mudaUser(t.dataset.urole,{role:t.value},'Mudou o perfil para '+roleTxt(t.value)+': '); } });
+document.addEventListener('change',function(ev){ var t=ev.target; if(!(t&&t.dataset&&t.dataset.urole&&souDono())) return;
+  var id=t.dataset.urole, u=(ACS||[]).find(function(x){return x.id===id}), v=t.value, antes=u?tipoAcs(u):'';
+  var campos=v==='cliente'?{role:'admin',projeto:id}:{role:v,projeto:'principal'}, faz=function(){ mudaUser(id,campos,'Mudou o perfil para '+roleTxt(v)+': '); };
+  if(v==='cliente') ask(nomeAcs(id)+' vai virar Cliente: passa a ter rifas próprias, separadas das suas, e deixa de ver as suas rifas. Continuar?',faz,'Tornar cliente');
+  else if(antes==='cliente') ask(nomeAcs(id)+' deixa de ser Cliente: volta a trabalhar nas suas rifas e perde o acesso às rifas próprias (os dados ficam guardados). A equipe dele também perde o acesso. Continuar?',faz,'Continuar');
+  else faz();
+  if(v==='cliente'||antes==='cliente') renderAcesso(); });
 function renderAcesso(){
   var el=$('v-acesso'); if(!el||!cur) return;
-  var h='<div class="card"><h2>Minha conta</h2><p style="margin:0 0 12px"><b>'+esc(cur.nome)+'</b> · '+esc(cur.email||cur.login)+' · <span class="tag '+(cur.role==='admin'?'v':'a')+'">'+roleTxt(cur.role)+'</span></p>'+
+  var h='<div class="card"><h2>Minha conta</h2><p style="margin:0 0 12px"><b>'+esc(cur.nome)+'</b> · '+esc(cur.email||cur.login)+' · <span class="tag '+(cur.role==='admin'?'v':'a')+'">'+papel(cur)+'</span></p>'+
     '<div class="row"><button class="act" data-a="minhasenha">Alterar minha senha</button><button class="act sec" data-a="sair">Sair</button>'+'</div></div>';
   if(isAdmin()){
     carregaAcessos(false);
-    h+=(souDono()?acessosHtml():'<div class="card"><h2>Acessos</h2><p class="hint" style="margin:0">Só o dono do sistema libera, bloqueia e cria acessos.</p></div>')+backupsHtml()+
+    h+=(souDono()?acessosHtml():souCliente()?membrosHtml():'<div class="card"><h2>Acessos</h2><p class="hint" style="margin:0">Só o dono do sistema libera, bloqueia e cria acessos.</p></div>')+backupsHtml()+
      '<div class="card"><h2>Segurança</h2><div class="row"><label style="min-width:240px">Sair sozinho após inatividade <select id="aIdle">'+[[0,'Nunca'],[5,'5 minutos'],[15,'15 minutos'],[30,'30 minutos'],[60,'1 hora']].map(function(o){return '<option value="'+o[0]+'"'+(idleMin()===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label></div>'+
      '<p class="hint">As senhas ficam guardadas de forma protegida no servidor, nunca neste aparelho. Quem esquecer a senha usa “Esqueci minha senha” na entrada, ou você troca a senha dela aqui em Acessos.</p></div>'+
-     '<div class="card"><h2>Licença</h2><p style="margin:0">'+(LICINFO?esc(SRLIC.resumo(LICINFO)):'—')+'</p><p class="hint">Código de ativação do sistema. Ele fica guardado na nuvem e vale para todos os acessos.</p></div>'+
+     (souCliente()?'':'<div class="card"><h2>Licença</h2><p style="margin:0">'+(LICINFO?esc(SRLIC.resumo(LICINFO)):'—')+'</p><p class="hint">Código de ativação do sistema. Ele fica guardado na nuvem e vale para todos os acessos.</p></div>')+
      '<div class="card"><h2>Registro de atividades</h2><div class="tw"><table><thead><tr><th>Quando</th><th>Quem</th><th>O que fez</th></tr></thead><tbody>'+
      (st.log||[]).slice(0,150).map(function(l){ return '<tr><td style="white-space:nowrap">'+esc(new Date(l.t).toLocaleString('pt-BR'))+'</td><td>'+esc(l.u)+'</td><td>'+esc(l.a)+'</td></tr>'; }).join('')+(st.log&&st.log.length?'':'<tr><td colspan="3" class="empty">Nenhuma atividade registrada.</td></tr>')+'</tbody></table></div></div>';
   }
@@ -3976,7 +4022,7 @@ document.addEventListener('change',function(ev){
 try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
 /* versão do sistema (aparece em Ajustes) e atualização automática: quando o site recebe uma versão nova,
    o app troca para ela e recarrega sozinho na mesma abertura, sem esperar a próxima */
-var APP_VER='v51 online', APP_DATA='22/10/2026';
+var APP_VER='v52 online', APP_DATA='23/10/2026';
 try{ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   var swTinha=!!navigator.serviceWorker.controller, swRecarregou=false;
   navigator.serviceWorker.addEventListener('controllerchange',function(){ if(!swTinha||swRecarregou) return; swRecarregou=true; location.reload(); });
@@ -4438,7 +4484,7 @@ function compDados(){
 function contatosDe(k,tel){ var c=st.contatos||{}, L=(c[k]||[]).slice(), d=digits(tel); if(d&&c['t'+d]) L=c['t'+d].concat(L); return L.sort(function(a,b){return a.d<b.d?-1:1}); }
 function ultContato(k,tel){ var L=contatosDe(k,tel); return L.length?L[L.length-1]:null; }
 function dlgComp(){
-  if(!isAdmin()) return;
+  if(!podeNumeros()) return;
   $('dlgBody').innerHTML='<div class="dh"><h2>Compradores <small>todas as rifas</small></h2><button class="act sec" data-a="fechar">Fechar</button></div>'+
     '<label>Buscar <input type="search" id="cpBusca" placeholder="Nome ou telefone" autocomplete="off"></label><div id="cpLista" style="margin-top:10px"></div>';
   if(!$('dlg').open) $('dlg').showModal(); compLista();

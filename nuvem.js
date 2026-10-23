@@ -5,7 +5,7 @@ var SRSYNC=(function(){
 'use strict';
 var URL_='https://jkytrjkdafugekjwvftn.supabase.co';
 var CHAVE='sb_publishable_exrE0gQazzreXYNnjr-jCw_DH-62EPS';
-var BKEY='rifas_nuvem_base_v1', PKEY='rifas_nuvem_perfil_v1';
+var BKEY='rifas_nuvem_base_v1', PKEY='rifas_nuvem_perfil_v1', JKEY='rifas_nuvem_projeto_v1';
 var FORA={rifas:1,users:1,sel:1,rec:1};
 var sb=null;
 try{ sb=window.supabase.createClient(URL_,CHAVE,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'smartrifa-auth'}}); }catch(e){}
@@ -13,8 +13,15 @@ var recuperando=/type=recovery/.test(location.hash||'');
 var H=null, base={}, perfil=null, canal=null, tmr=null, enviando=false, denovo=false, estado='', ouvintes=[], lerTodos=null;
 
 function ok(){ return !!sb; }
-function lerBase(){ try{ base=JSON.parse(localStorage.getItem(BKEY))||{}; }catch(e){ base={}; } }
-function gravaBase(){ try{ localStorage.setItem(BKEY,JSON.stringify(base)); }catch(e){} }
+/* cada cliente tem os próprios dados ("projeto"); o do dono do sistema é o "principal".
+   Na nuvem, os documentos de um cliente têm o nome "<projeto>/<documento>". */
+function proj(){ return (perfil&&perfil.projeto)||'principal'; }
+function pfx(){ return proj()==='principal'?'':proj()+'/'; }
+function rid(id){ return pfx()+id; }
+function lid(r){ var p=pfx(); if(!p) return r.indexOf('/')<0?r:null; return r.indexOf(p)===0?r.slice(p.length):null; }
+function bkey(){ return proj()==='principal'?BKEY:BKEY+':'+proj(); }
+function lerBase(){ try{ base=JSON.parse(localStorage.getItem(bkey()))||{}; }catch(e){ base={}; } }
+function gravaBase(){ try{ localStorage.setItem(bkey(),JSON.stringify(base)); }catch(e){} }
 function marca(s){ if(s===estado) return; estado=s; ouvintes.forEach(function(f){ try{ f(s); }catch(e){} }); }
 function aoMudarEstado(f){ ouvintes.push(f); f(estado); }
 
@@ -109,13 +116,13 @@ function envia(){
 function enviaUm(id,data,t){
   if(t>5) return Promise.resolve();
   var b=base[id], j=J(data);
-  var q=b?sb.from('docs').update({data:data,version:b.v+1}).eq('id',id).eq('version',b.v).select('version')
-         :sb.from('docs').insert({id:id,data:data,version:1}).select('version');
+  var q=b?sb.from('docs').update({data:data,version:b.v+1}).eq('id',rid(id)).eq('version',b.v).select('version')
+         :sb.from('docs').insert({id:rid(id),projeto:proj(),data:data,version:1}).select('version');
   return q.then(function(r){
     if(!r.error&&r.data&&r.data.length){ base[id]={v:r.data[0].version,j:j}; gravaBase(); return; }
     if(r.error&&!(r.error.code==='23505')) throw r.error;
     /* outra pessoa salvou antes: junta as duas versões e tenta de novo */
-    return sb.from('docs').select('data,version').eq('id',id).maybeSingle().then(function(q2){
+    return sb.from('docs').select('data,version').eq('id',rid(id)).maybeSingle().then(function(q2){
       if(q2.error) throw q2.error;
       if(!q2.data) throw new Error('sem permissão para salvar');
       var bd=b?JSON.parse(b.j):undefined, rd=q2.data.data, m=merge3(bd,data,rd);
@@ -145,24 +152,26 @@ function recebe(L){
 }
 function puxaTudo(){
   if(!sb) return Promise.resolve(false);
-  return sb.from('docs').select('id,data,version').then(function(r){
+  return sb.from('docs').select('id,data,version').eq('projeto',proj()).then(function(r){
     if(r.error) throw r.error;
-    var vazia=!r.data.length;
-    recebe(r.data);
+    var L=[]; r.data.forEach(function(x){ var id=lid(x.id); if(id) L.push({id:id,data:x.data,version:x.version}); });
+    var vazia=!L.length;
+    recebe(L);
     if(lerTodos){ lerTodos(); lerTodos=null; }
     agenda(vazia?100:700);
     return true;
   });
 }
 function puxaUm(id){
-  return sb.from('docs').select('data,version').eq('id',id).maybeSingle().then(function(r){ if(!r.error&&r.data) recebe([{id:id,data:r.data.data,version:r.data.version}]); });
+  return sb.from('docs').select('data,version').eq('id',rid(id)).maybeSingle().then(function(r){ if(!r.error&&r.data) recebe([{id:id,data:r.data.data,version:r.data.version}]); });
 }
 function escuta(){
   if(canal||!sb) return;
-  canal=sb.channel('docs-mudancas').on('postgres_changes',{event:'*',schema:'public',table:'docs'},function(p){
+  canal=sb.channel('docs-'+proj()).on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'projeto=eq.'+proj()},function(p){
     var n=p&&p.new; if(!n||!n.id) return;
-    var b=base[n.id]; if(b&&n.version&&b.v>=n.version) return;
-    puxaUm(n.id);
+    var id=lid(n.id); if(!id) return;
+    var b=base[id]; if(b&&n.version&&b.v>=n.version) return;
+    puxaUm(id);
   }).subscribe(function(s){ if(s==='SUBSCRIBED') puxaTudo().catch(function(){}); });
 }
 
@@ -180,10 +189,13 @@ function traduz(e){
 function guardaPerfil(p){ perfil=p; try{ if(p) localStorage.setItem(PKEY,J(p)); else localStorage.removeItem(PKEY); }catch(e){} }
 function perfilGuardado(id){ try{ var p=JSON.parse(localStorage.getItem(PKEY)); return p&&p.id===id?p:null; }catch(e){ return null; } }
 function carregaPerfil(user){
-  return sb.from('profiles').select('id,email,nome,tel,role,status,dono').eq('id',user.id).maybeSingle().then(function(r){
+  return sb.from('profiles').select('id,email,nome,tel,role,status,dono,projeto').eq('id',user.id).maybeSingle().then(function(r){
     if(r.error) throw r.error;
-    if(!r.data) return {id:user.id,email:user.email,nome:'',role:'vendedor',status:'pendente'};
-    return r.data;
+    if(!r.data) return {id:user.id,email:user.email,nome:'',role:'vendedor',status:'pendente',projeto:'principal'};
+    var p=r.data;
+    /* membro de um cliente que foi bloqueado também fica sem acesso */
+    if(p.status!=='ativo'||p.projeto==='principal') return p;
+    return sb.rpc('meu_projeto').then(function(q){ if(!q.error&&!q.data){ p.status='bloqueado'; p.semCliente=true; } return p; });
   });
 }
 /* sessão atual: devolve o perfil (ou null). Sem internet, usa o último perfil guardado neste aparelho. */
@@ -227,17 +239,18 @@ function emRecuperacao(){ return recuperando; }
 if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='PASSWORD_RECOVERY'){ recuperando=true; if(H&&H.recuperacao) H.recuperacao(); } });
 
 /* administração de acessos */
-function perfis(){ return sb.from('profiles').select('id,email,nome,tel,role,status,dono,criado_em').order('criado_em').then(function(r){ if(r.error) throw new Error(traduz(r.error)); return r.data; }); }
+function perfis(){ return sb.from('profiles').select('id,email,nome,tel,role,status,dono,projeto,criado_em').order('criado_em').then(function(r){ if(r.error) throw new Error(traduz(r.error)); return r.data; }); }
 function mudaPerfil(id,campos){ return sb.from('profiles').update(campos).eq('id',id).select('id').then(function(r){ if(r.error) throw new Error(/administrador ativo/.test(r.error.message)?'Precisa existir ao menos um administrador ativo.':traduz(r.error)); if(!r.data||!r.data.length) throw new Error('Sem permissão.'); }); }
 function criaAcesso(o){ o.acao='criar'; return funcao(o); }
 function trocaSenha(id,senha){ return funcao({acao:'senha',id:id,senha:senha}); }
 function excluiAcesso(id){ return funcao({acao:'excluir',id:id}); }
+function statusAcesso(id,status){ return funcao({acao:'status',id:id,status:status}); }
 function backups(){ return sb.from('backups').select('id,slot,tipo,criado_em').order('criado_em',{ascending:false}).then(function(r){ if(r.error) throw new Error(traduz(r.error)); return r.data; }); }
 function backup(id){ return sb.from('backups').select('criado_em,dados').eq('id',id).single().then(function(r){ if(r.error) throw new Error(traduz(r.error)); return {em:r.data.criado_em,st:junta(r.data.dados,null)}; }); }
 
 /* ---------- ligar / desligar a sincronização ---------- */
 function liga(h){
-  H=h; lerBase();
+  H=h;
   window.addEventListener('online',function(){ agenda(300); puxaTudo().catch(function(){}); });
   window.addEventListener('offline',function(){ marca('offline'); });
   document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'&&perfil) puxaTudo().catch(function(){}); });
@@ -245,6 +258,10 @@ function liga(h){
 /* começa a sincronizar; "pronto" é chamado depois da primeira leitura da nuvem (ou na hora, se estiver sem internet) */
 function conecta(pronto){
   var feito=false; function fim(){ if(!feito){ feito=true; pronto&&pronto(); } }
+  /* outro projeto neste aparelho (ex.: entrou outra conta): começa sem os dados locais da conta anterior */
+  var ult=null; try{ ult=localStorage.getItem(JKEY)||'principal'; localStorage.setItem(JKEY,proj()); }catch(e){}
+  if(ult&&ult!==proj()&&H.zera) H.zera();
+  desliga(); lerBase();
   lerTodos=fim;
   if(navigator.onLine===false){ marca('offline'); fim(); }
   puxaTudo().then(function(){ escuta(); },function(){ marca(navigator.onLine===false?'offline':'erro'); fim(); escuta(); });
@@ -254,6 +271,6 @@ function desliga(){ clearTimeout(tmr); if(canal&&sb){ try{ sb.removeChannel(cana
 
 return {ok:ok,liga:liga,conecta:conecta,desliga:desliga,agenda:agenda,aoMudarEstado:aoMudarEstado,sessao:sessao,entrar:entrar,sair:sair,
   pedirAcesso:pedirAcesso,recuperar:recuperar,novaSenha:novaSenha,emRecuperacao:emRecuperacao,perfil:function(){ return perfil; },
-  perfis:perfis,mudaPerfil:mudaPerfil,criaAcesso:criaAcesso,trocaSenha:trocaSenha,excluiAcesso:excluiAcesso,backups:backups,backup:backup,
+  perfis:perfis,mudaPerfil:mudaPerfil,criaAcesso:criaAcesso,statusAcesso:statusAcesso,trocaSenha:trocaSenha,excluiAcesso:excluiAcesso,backups:backups,backup:backup,
   _merge3:merge3,_divide:divide,_junta:junta};
 })();

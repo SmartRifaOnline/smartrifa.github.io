@@ -1,6 +1,6 @@
 /* Smart Rifa – funcionamento offline */
 /* Abre na hora pelo que está guardado no aparelho e atualiza em segundo plano (a versão nova aparece na próxima abertura). */
-const VERSAO='smart-rifa-v51';
+const VERSAO='smart-rifa-v52';
 const BASE=['./','./index.html','./supabase.js','./nuvem.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png','./icons/apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSAO).then(c=>c.addAll(BASE)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VERSAO&&!k.endsWith('-libs')).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
